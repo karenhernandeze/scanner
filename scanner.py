@@ -65,16 +65,15 @@ if __name__ == "__main__":
     with open(open_file, 'r', encoding='utf-8') as file:
         state = 1
         flag = 0
-        i = 0
+        i = 1
         while True:
-            i += 1
             # get char to read
             char = file.read(1).lower()
             if not char: 
                 if state == 7 or state == 8:
-                    print("errroooroororor in comments, not closed ")
+                    raise Exception(f"Comments not Closed. \nError in line: {i}")
                 elif state == 12:
-                    print("errroooroororor in strings, not closed ")
+                    raise Exception(f"String not Closed. \nError in line: {i}")
                 print('Reached end of file')
                 break
                     
@@ -84,15 +83,15 @@ if __name__ == "__main__":
             get_int = key_converter(transition)
             # get the new state given the transition
             if state > 13:
-                print("ERROR in characters ")
-                break
-                # pass
+                raise Exception(f"Invalid Character. \nError in line: {i}")
             else:
                 new_state = transition_states[state][get_int] 
                 state = int(new_state)
 
                 # delim_tokens 
                 if state == 1:
+                    if char == '\n':
+                        i += 1
                     pass
                 # read all the chars from the string 
                 # if it is letter
@@ -203,8 +202,15 @@ if __name__ == "__main__":
                     flag = 1
                 # if something went to an error state 
                 elif state in error_states:
-                    raise Exception("Error in line: ")
-                    # print("ERROR")
+                    if state == 38:
+                        raise Exception(f"Invalid Character. \nError in line: {i}")
+                    elif state == 39:
+                        raise Exception(f"Invalid ID. \nError in line: {i}")
+                    elif state == 40: 
+                        raise Exception(f"Invalid Number. \nError in line: {i}")
+                    elif state == 41:
+                        raise Exception(f"Invalid String. \nError in line: {i}")
+                    raise Exception(f"Error in line {i}")
                
         print("Scanner Output: ")
         for i in output:

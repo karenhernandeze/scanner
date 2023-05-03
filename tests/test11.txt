@@ -4,7 +4,7 @@ string "este es otro";
 float 10.2321;
 float 1.231;
 
-int miniloc(float a[], int low, int high){
+int 32miniloc(float a[], int low, int high){
     int i; float y; int k;
 
     k = low;
