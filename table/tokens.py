@@ -36,6 +36,7 @@ def tokens_table():
             "ID", #33
             "integer_cons", #34
             "integer_float", #35
+            "strings", #36
             ]
 
     for i, k in enumerate(keys):

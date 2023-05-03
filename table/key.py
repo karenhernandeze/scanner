@@ -49,6 +49,5 @@ def key_converter(value: str):
             '"': 19,
             "delim": 20,
             "rare_char": 21,
-            "comments": 22
             }
     return keys[value]

@@ -1,3 +1,4 @@
+string = "131231431fwra";
 int x[10]; 
 string s; 
 float f1; 
