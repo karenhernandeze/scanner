@@ -36,10 +36,6 @@ def get_value(char: str) -> str:
         return "rare_char"
 
 def add_to_output(token: str, type: str):
-    # if len(string_table) != 0:
-    #     str1 = ""
-    #     for e in string_table:
-    #         str1 += e 
     if type == "ID": 
         del string_table[:]
         value = tokens["ID"]
@@ -51,7 +47,7 @@ def add_to_output(token: str, type: str):
     elif type == "string":
         value = tokens["strings"]
         output.append((value, token))
-        del strings_output_table[:]
+        del string_table[:]
     elif type == "num1":
         value = tokens["integer_cons"]
         output.append((value, token))
@@ -65,11 +61,13 @@ def add_to_output(token: str, type: str):
         output.append(value)
 
 if __name__ == "__main__":
-    open_file = "tests/test1.txt"
+    open_file = "tests/test11.txt"
     with open(open_file, 'r', encoding='utf-8') as file:
         state = 1
         flag = 0
+        i = 0
         while True:
+            i += 1
             # get char to read
             char = file.read(1).lower()
             if not char: 
@@ -86,9 +84,9 @@ if __name__ == "__main__":
             get_int = key_converter(transition)
             # get the new state given the transition
             if state > 13:
-                # print("ERROR in characters ")
-                # break
-                pass
+                print("ERROR in characters ")
+                break
+                # pass
             else:
                 new_state = transition_states[state][get_int] 
                 state = int(new_state)
@@ -106,15 +104,17 @@ if __name__ == "__main__":
                 # if a string is beginning
                 elif state == 12: 
                     # add all incoming strings to array, no matter if it is repetitive 
-                    strings_output_table.append(char)
+                    string_table.append(char)
                     # flag used to check if the string is closed  
                     flag = 1
                 # means a string came up and has been closed 
                 elif state == 14:
                     flag = 0
                     str1 = ""
-                    for e in strings_output_table:
+                    for e in string_table:
                         str1 += e 
+                    str1 = str1 + '"'
+                    strings_output_table.append(str1)
                     add_to_output(str1, "string")
                     # once reached a termimal state, set state to 1 
                     state = 1
@@ -122,12 +122,6 @@ if __name__ == "__main__":
                 # if char is a special symbol 
                 elif state >= 15 and state <= 25:
                     add_to_output(char, "")
-                    # CHECK!!!! TO - DO. Used different approach now. check if necessary 
-                    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-                    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-                    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-                    # if char not in delim_tokens:
-                    #     add_to_output(char, "")
                     state = 1
                     continue
                 # a comment was opened and now closed, too. set flag to 0 
