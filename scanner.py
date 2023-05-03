@@ -19,8 +19,11 @@ number_table = []
 
 output = []
 
-terminal_states = [13,25,26,27,28,29,30,31,32,33,34,35,36]
-states_checked = [14,15,16,17,18,19,20,21,22,23,24]
+# terminal_states = [13,25,26,27,28,29,30,31,32,33,34,35,36]
+# terminal_states = [13,14,15,16,17,18,19,20,21,22,23,24,25,
+#                    26,27,28,29,30,31,32,33,34,35,36]
+# states_checked = [4, 14,15,16,17,18,19,20,21,22,23,24]
+error_states = [38,39,40,41]
 
 def get_value(char: str) -> str:
     if char.isdigit():
@@ -47,6 +50,14 @@ def add_to_output(token: str, type: str):
         value = tokens[str1]
         output.append(value)
         del string_table[:]
+    elif type == "num1":
+        value = tokens["integer_cons"]
+        output.append(value)
+        del number_table[:]
+    elif type == "num2":
+        value = tokens["integer_float"]
+        output.append(value)
+        del number_table[:]
     else:
         value = tokens[token]
         output.append(value)
@@ -69,57 +80,81 @@ if __name__ == "__main__":
             # get the new state given the transition
             new_state = transition_states[state][get_int] 
             state = int(new_state)
-            print("S: ",state)
+
             # delim_tokens 
             if state == 1:
                 pass
             # read all the chars from the string 
+            # is letter
             if state == 9:
                 string_table.append(char)
-            elif state == 10:
-                integer_table.append(char) 
-            elif state == 34 or state == 35:
+            # integers or floats, save to table 
+            elif state == 10 or state == 11 or state == 13:
+                number_table.append(char) 
+            elif state <= 15 or state >= 25:
+                if char not in delim_tokens:
+                    add_to_output(char, "")
+                state = 1
+                continue
+            # ids or keywords 
+            elif state == 35:
+                # it reached the final state of an id, check if it is keyword or ids
                 str1 = ""
                 for e in string_table:
                     str1 += e 
                 if str1 in keywords:
                     add_to_output(str1, "KW")
                 else: 
+                    # if it is an id append it to the ids table 
                     add_to_output(str1, "ID")
                     token_ids_table.append(str1)
+                # if the string table is empty it means a special symbols has come up after an id 
+                if not string_table:
+                    if char not in delim_tokens:
+                        add_to_output(char, "")
                 state = 1
-                print("VALUE")
-                print(char)
+                continue
+            # integers
+            elif state == 35:
+                str1 = ""
+                for e in number_table:
+                    str1 += e 
+                add_to_output(str1, "num1")
+                integer_table.append(str1)
+                state = 1
+                # too add delimeters that are next to a num e.g. 4>5
                 if char not in delim_tokens:
                     add_to_output(char, "")
                 continue
-            elif state in terminal_states:
-                if state == 30:
-                    print("VALUE")
-                    print(char)
-                    print(char[-1])
+            # floats
+            elif state == 36:
+                str1 = ""
+                for e in number_table:
+                    str1 += e 
+                add_to_output(str1, "num2")
+                float_table.append(str1)
+                state = 1
+                # too add delimeters that are next to a num e.g. 4.5>5
                 if char not in delim_tokens:
                     add_to_output(char, "")
-                # str1 = ""
-                # for e in string_table:
-                #     str1 += e 
-                # if str1 in keywords:
-                #     # keywords_table.append(str1)
-                #     add_to_output(str1, "KW")
-                # else: 
-                #     add_to_output(str1, "ID")
-                #     token_ids_table.append(str1)
-                state = 1
                 continue
-            elif state in states_checked:
+            # elif state in terminal_states:
+            #     if char not in delim_tokens:
+            #         add_to_output(char, "")
+            #     state = 1
+            #     continue
+            elif state in error_states:
+                print("ERROR")
+            else:
                 if char not in delim_tokens:
                     add_to_output(char, "")
-                # print("HERE!!!!")
                 state = 1
                 continue
-
-            # elif state == 37:
-            #     print("ERROR")
+            # elif state in states_checked:
+            #     if char not in delim_tokens:
+            #         add_to_output(char, "")
+            #     state = 1
+            #     continue
 
         for e in token_ids_table:
             print("TOEKENS: ")
