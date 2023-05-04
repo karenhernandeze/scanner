@@ -1,6 +1,7 @@
 from table.transitions import transitions_table
 from table.key import key_converter
 from table.tokens import tokens_table
+import os.path
 
 # White spaces = blanks, newlines, and tabs
 delim_tokens = [" ", "\n", "\t", ""]
@@ -39,40 +40,52 @@ def add_to_output(token: str, type: str):
     if type == "ID": 
         del string_table[:]
         value = tokens["ID"]
-        output.append((value, token))
+        index = token_ids_table.index(token)
+        output.append((value, index+1))
     elif type == "KW":
         value = tokens[str1]
         output.append(value)
         del string_table[:]
     elif type == "string":
         value = tokens["strings"]
-        output.append((value, token))
+        index = strings_output_table.index(token)
+        output.append((value, index+1))
         del string_table[:]
     elif type == "num1":
         value = tokens["integer_cons"]
-        output.append((value, token))
+        index = integer_table.index(token)
+        output.append((value, index+1))
         del number_table[:]
     elif type == "num2":
         value = tokens["integer_float"]
-        output.append((value, token))
+        index = float_table.index(token)
+        output.append((value, index+1))
         del number_table[:]
     else:
         value = tokens[token]
         output.append(value)
 
 if __name__ == "__main__":
-    open_file = "tests/test11.txt"
+    test_num = 11
+    open_file = f"tests/test{test_num}.txt"
     with open(open_file, 'r', encoding='utf-8') as file:
         state = 1
         flag = 0
         i = 1
         while True:
+            # print the ouput also in the next .txt file to assert true or false the tests 
+            if os.path.exists(f"tests/output_results/results{test_num}.txt"):
+                os.remove(f"tests/output_results/results{test_num}.txt")
+            f = open(f"tests/output_results/results{test_num}.txt", "a")
+
             # get char to read
             char = file.read(1).lower()
             if not char: 
                 if state == 7 or state == 8:
+                    f.write(f"Comments not Closed. \nError in line: {i}")
                     raise Exception(f"Comments not Closed. \nError in line: {i}")
                 elif state == 12:
+                    f.write(f"Comments not Closed. \nError in line: {i}")
                     raise Exception(f"String not Closed. \nError in line: {i}")
                 print('Reached end of file')
                 break
@@ -83,6 +96,7 @@ if __name__ == "__main__":
             get_int = key_converter(transition)
             # get the new state given the transition
             if state > 13:
+                f.write(f"Invalid Character. \nError in line: {i}")
                 raise Exception(f"Invalid Character. \nError in line: {i}")
             else:
                 new_state = transition_states[state][get_int] 
@@ -137,12 +151,12 @@ if __name__ == "__main__":
                     if str1 in keywords:
                         add_to_output(str1, "KW")
                     else: 
-                        # if it is an id append it to the ids table 
-                        add_to_output(str1, "ID")
                         if str1 in token_ids_table:
                             pass 
                         else:
                             token_ids_table.append(str1)
+                        # if it is an id append it to the ids table 
+                        add_to_output(str1, "ID")
                     # if the string table is empty it means a special symbols has come up after inmeditaly after an id 
                     if not string_table:
                         # if something came up inmediatly after but it was a delimiter, do not add 
@@ -155,11 +169,11 @@ if __name__ == "__main__":
                     str1 = ""
                     for e in number_table:
                         str1 += e 
-                    add_to_output(str1, "num1")
                     if str1 in integer_table:
                         pass 
                     else:
                         integer_table.append(str1)
+                    add_to_output(str1, "num1")
                     state = 1
                     # to add delimeters that are next to a num e.g. 4>5
                     if char not in delim_tokens:
@@ -170,11 +184,11 @@ if __name__ == "__main__":
                     str1 = ""
                     for e in number_table:
                         str1 += e 
-                    add_to_output(str1, "num2")
                     if str1 in float_table:
                         pass 
                     else:
                         float_table.append(str1)
+                    add_to_output(str1, "num2")
                     state = 1
                     # too add delimeters that are next to a num e.g. 4.5>5
                     if char not in delim_tokens:
@@ -203,27 +217,60 @@ if __name__ == "__main__":
                 # if something went to an error state 
                 elif state in error_states:
                     if state == 38:
+                        f.write(f"Invalid Character. \nError in line: {i}")
                         raise Exception(f"Invalid Character. \nError in line: {i}")
                     elif state == 39:
+                        f.write(f"Invalid ID. \nError in line: {i}")
                         raise Exception(f"Invalid ID. \nError in line: {i}")
                     elif state == 40: 
+                        f.write(f"Invalid Number. \nError in line: {i}")
                         raise Exception(f"Invalid Number. \nError in line: {i}")
                     elif state == 41:
+                        f.write(f"Invalid String. \nError in line: {i}")
                         raise Exception(f"Invalid String. \nError in line: {i}")
                     raise Exception(f"Error in line {i}")
-               
+        
+        
+
         print("Scanner Output: ")
         for i in output:
-            print(i)
+            f.write(str(i)+'\n')
+            print((i))
         
+        j = 1
+        print(f"Integer Constants Table:")
+        if not integer_table:
+            print("Table Empty.")
         for i in integer_table:
-            print("Integer Constants Table: ", i)
+            f.write(f"Entry {j}: "+ str(i)+'\n')
+            print(f"Entry {j}: ", i)
+            j += 1
 
-        for f in float_table:
-            print("Floats Constants Table: ", f)
+        k = 1
+        print(f"Floats Constants Table:")
+        if not float_table:
+            print("Table Empty.")
+        for fn in float_table:
+            f.write(f"Entry {k}: "+ str(fn)+'\n')
+            print(f"Entry {k}: ", fn)
+            k += 1
 
+        l = 1
+        print(f"Token IDs Table:")
+        if not token_ids_table:
+            print("Table Empty.")
         for t in token_ids_table:
-            print("Token IDs Table: ", t)
+            f.write(f"Entry {l}: "+ t+'\n')
+            print(f"Entry {l}: ", t)
+            l += 1
         
+        m = 1
+        print("Strings Table:")
+        if not strings_output_table:
+            print("Table Empty.")
         for s in strings_output_table:
-            print("Strings Table: ", s)
+            f.write(f"Entry {m}: "+ s+'\n')
+            print(f"Entry {m}: ", s)
+            m += 1
+
+    f.close()
