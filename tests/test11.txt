@@ -3,6 +3,7 @@ string "este es un string";
 string "este es otro";
 float 10.2321;
 float 1.231;
+/* END of miniloc() */
 
 int 32miniloc(float a[], int low, int high){
     int i; float y; int k;
@@ -19,4 +20,4 @@ int 32miniloc(float a[], int low, int high){
         i = 1+1;
     }
     return k;
-}/* END of miniloc() */
+}

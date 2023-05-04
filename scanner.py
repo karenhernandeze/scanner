@@ -85,7 +85,7 @@ if __name__ == "__main__":
                     f.write(f"Comments not Closed. \nError in line: {i}")
                     raise Exception(f"Comments not Closed. \nError in line: {i}")
                 elif state == 12:
-                    f.write(f"Comments not Closed. \nError in line: {i}")
+                    f.write(f"String not Closed. \nError in line: {i}")
                     raise Exception(f"String not Closed. \nError in line: {i}")
                 print('Reached end of file')
                 break
@@ -228,9 +228,7 @@ if __name__ == "__main__":
                     elif state == 41:
                         f.write(f"Invalid String. \nError in line: {i}")
                         raise Exception(f"Invalid String. \nError in line: {i}")
-                    raise Exception(f"Error in line {i}")
-        
-        
+                    raise Exception(f"Error in line {i}")        
 
         print("Scanner Output: ")
         for i in output:
