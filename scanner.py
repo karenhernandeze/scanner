@@ -163,6 +163,11 @@ if __name__ == "__main__":
                     # once reached a termimal state, set state to 1 
                     state = 1
                     continue
+                # a division was made
+                elif state == 33:
+                    add_to_output('/', "")
+                    state = 1
+                    continue
                 # a comment was opened and now closed, too. set flag to 0 
                 elif state == 34:
                     # set flag to 0, meaning no error. 
