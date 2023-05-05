@@ -1,3 +1,4 @@
+# Function used to import the transition table from csv. The return format is a list. 
 import csv
 
 def transitions_table():

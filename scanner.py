@@ -9,13 +9,17 @@ keywords= ["int", "float", "if", "else", "read", "write", "string", "for", "whil
 special_symbols = ["+", "-", "*", ";", ",", "(", ")", 
                    "[", "]", "{", "}", "<", ">", "=", "!", "/", ".", '"', ]
 
+# retrieve the transition table, given in a list format 
 transition_states = transitions_table()
+# retrieve the tokens table, given in an dictionary data type 
 tokens = tokens_table()
+# outputs table. Symbol Table, for all valid Tokens. 1) Integer 2) Floats 3) Tokens 4) Strings 
 integer_table = []
 float_table = []
 token_ids_table = []
 strings_output_table = []
 
+# temp arrays to store the 'words' and numbers, before being added to the outputs table 
 string_table = []
 number_table = []
 
@@ -24,6 +28,7 @@ output = []
 error_states = [38,39,40,41]
 symbols_states = [26,27,28,29,30,31,32]
 
+# function used to know what type of char are we getting 
 def get_value(char: str) -> str:
     if char.isdigit():
         return "digit"
@@ -36,7 +41,12 @@ def get_value(char: str) -> str:
     else:
         return "rare_char"
 
+# funciton used to construct the output array. 
 def add_to_output(token: str, type: str):
+    # for all the tokens, we first get the value from the token id table. e.g. if we get an int
+    # the value return will be 1, given it is the index for that symbol. Next if it is and ID, string 
+    # or number, we will get the index of that symbol table, before hand they have been already added 
+    # to it respective table. Finally the value is added to the output array 
     if type == "ID": 
         del string_table[:]
         value = tokens["ID"]
@@ -66,12 +76,16 @@ def add_to_output(token: str, type: str):
         output.append(value)
 
 if __name__ == "__main__":
-    test_num = 11
+    # change the test_num variable depending on which test you want to run 
+    test_num = 1
     open_file = f"tests/test{test_num}.txt"
     with open(open_file, 'r', encoding='utf-8') as file:
         state = 1
+        # flag used to check if strings and comments have been closed 
         flag = 0
+        # identifier used to get the line where the code threw an exception 
         i = 1
+
         while True:
             # print the ouput also in the next .txt file to assert true or false the tests 
             if os.path.exists(f"tests/output_results/results{test_num}.txt"):
@@ -81,6 +95,7 @@ if __name__ == "__main__":
             # get char to read
             char = file.read(1).lower()
             if not char: 
+                # if it reached the end of the file and the comment or string hasnt been closed an exception is thrown 
                 if state == 7 or state == 8:
                     f.write(f"Comments not Closed. \nError in line: {i}")
                     raise Exception(f"Comments not Closed. \nError in line: {i}")
@@ -95,38 +110,48 @@ if __name__ == "__main__":
             # convert the char to int to be able to use the key from the transitions table
             get_int = key_converter(transition)
             # get the new state given the transition
+
+            # if the state is bigger than 13 it means and invalid char has been given. 
             if state > 13:
                 f.write(f"Invalid Character. \nError in line: {i}")
                 raise Exception(f"Invalid Character. \nError in line: {i}")
             else:
-                new_state = transition_states[state][get_int] 
+                # get the new state given the transition 
+                # e. g. transition_state[1][/] -> transition_state[1][17] = 6 
+                # new state = 6
+                new_state = transition_states[state][get_int]
                 state = int(new_state)
 
                 # delim_tokens 
                 if state == 1:
                     if char == '\n':
                         i += 1
+                    # ignore the delimeters
                     pass
                 # read all the chars from the string 
                 # if it is letter
                 elif state == 9:
+                    # append it to the temp array of strings 
                     string_table.append(char)
                 # integers or floats, save to table 
                 elif state == 10 or state == 11 or state == 13:
+                    # append it to the temp array of numbers 
                     number_table.append(char) 
                 # if a string is beginning
                 elif state == 12: 
-                    # add all incoming strings to array, no matter if it is repetitive 
+                    # append it to the temp array of strings 
                     string_table.append(char)
-                    # flag used to check if the string is closed  
+                    # flag used to check if the string is closed. Set to 1.  
                     flag = 1
                 # means a string came up and has been closed 
                 elif state == 14:
+                    # set flag to 0, meaning no error. 
                     flag = 0
                     str1 = ""
                     for e in string_table:
                         str1 += e 
                     str1 = str1 + '"'
+                    # add the string to the output string table, given it reached the terminal state 
                     strings_output_table.append(str1)
                     add_to_output(str1, "string")
                     # once reached a termimal state, set state to 1 
@@ -135,10 +160,12 @@ if __name__ == "__main__":
                 # if char is a special symbol 
                 elif state >= 15 and state <= 25:
                     add_to_output(char, "")
+                    # once reached a termimal state, set state to 1 
                     state = 1
                     continue
                 # a comment was opened and now closed, too. set flag to 0 
                 elif state == 34:
+                    # set flag to 0, meaning no error. 
                     flag = 0
                     state = 1
                     continue
@@ -231,6 +258,7 @@ if __name__ == "__main__":
                     raise Exception(f"Error in line {i}")        
 
         print("Scanner Output: ")
+        print(output)
         for i in output:
             f.write(str(i)+'\n')
             print((i))
